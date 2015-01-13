@@ -18,8 +18,6 @@ class Related_Links_Handler {
     public function init() {
         add_action('wp_ajax_related_link_reorder', array($this, "reorderLink"));
 
-        //add_action("wp_ajax_related_links_delete", array($this, "deleteLink"));
-
         add_action("wp_ajax_related_links_add", array($this, "addLink"));
 
         add_action('wp_ajax_related_links_list', array($this, "displayLinks"));
@@ -27,8 +25,6 @@ class Related_Links_Handler {
         add_action('wp_ajax_related_links_get_all', array($this, 'getAll'));
 
         add_action('wp_ajax_related_links_get_one', array($this, "getLinkJson"));
-
-        //add_action('wp_ajax_related_links_update', array($this, "updateLink"));
         
         add_action('wp_ajax_related_links_update_label', array($this, 'updateLabel'));
         add_action('wp_ajax_related_links_update_link', array($this, 'updateLink'));
@@ -37,8 +33,6 @@ class Related_Links_Handler {
         add_action("add_meta_boxes", array($this, "metabox"), 11, 2);
 
         add_action("save_post", array($this, 'save'));
-
-        //add_action("admin_menu", array($this, "adminMenu"));
 
         self::$instance = $this;
     }
