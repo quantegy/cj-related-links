@@ -1,4 +1,5 @@
 <?php
+namespace CJ_Related_Links;
 
 class Related_Links_Handler {
     const VERSION = '0.0.1';
@@ -45,7 +46,7 @@ class Related_Links_Handler {
         
         $html = '';
         ob_start();
-        include 'features_related_links.php';
+        include 'templates/features_related_links.php';
         $html .= ob_get_clean();
 
         echo $html;
@@ -142,10 +143,9 @@ class Related_Links_Handler {
         wp_enqueue_script('jeditable', plugins_url() . '/' . $this->pluginDir . '/js/jquery.jeditable.mini.js', array('jquery'));
 
         $links = $this->getLinks($post->ID);
-
         $html = '<!-- begin admin panel output -->';
         ob_start();
-        include 'feature_links.php';
+        include 'templates/feature_links.php';
         $html .= ob_get_clean();
 
         echo $html;

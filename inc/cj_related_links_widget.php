@@ -53,7 +53,7 @@ class CJ_Related_Links_Widget extends WP_Widget {
         // widget options
         $title = apply_filters('widget_title', $instance['title']);
         
-        $links = Related_Links_Handler::getInstance()->getLinks($post->ID);
+        $links = \CJ_Related_Links\Related_Links_Handler::getInstance()->getLinks($post->ID);
         
         $html = '';
         ob_start();

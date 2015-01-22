@@ -12,16 +12,16 @@
 
 defined('ABSPATH') or die("No script kiddies please!");
 
+set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__));
+
 @define('CJ_RELATED_LINKS_VERSION_OPTION', 'cj_related_links_version');
 
-set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__).'/inc'.PATH_SEPARATOR. dirname(__FILE__).'/templates');
-
-require_once 'handler.php';
-require_once 'widget.php';
+require_once 'inc/cj_related_links_handler.php';
+require_once 'inc/cj_related_links_widget.php';
 
 register_activation_hook(__FILE__, 'cj_related_links_install');
 
-add_action('init', array(new Related_Links_Handler(), "init"));
+add_action('init', array(new \CJ_Related_Links\Related_Links_Handler(), "init"));
 
 add_action('plugins_loaded', 'cj_related_links_check');
 
@@ -40,7 +40,7 @@ function cj_related_links_load_widget() {
  * this will run update checks
  */
 function cj_related_links_check() {
-    if(get_site_option(CJ_RELATED_LINKS_VERSION_OPTION) != Related_Links_Handler::VERSION) {
+    if(get_site_option(CJ_RELATED_LINKS_VERSION_OPTION) != \CJ_Related_Links\Related_Links_Handler::VERSION) {
         cj_related_links_install();
     }
 }
@@ -52,7 +52,7 @@ function cj_related_links_check() {
 function cj_related_links_install() {
     global $wpdb;
     
-    $tableName = $wpdb->prefix . Related_Links_Handler::TABLE_SUFFIX;
+    $tableName = $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_SUFFIX;
     $charsetCollate = $wpdb->get_charset_collate();
     $sql = "CREATE TABLE IF NOT EXISTS $tableName ("
             . "id INT(11) NOT NULL AUTO_INCREMENT,"
@@ -64,6 +64,6 @@ function cj_related_links_install() {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
     
-    add_option(CJ_RELATED_LINKS_VERSION_OPTION, Related_Links_Handler::VERSION);
+    add_option(CJ_RELATED_LINKS_VERSION_OPTION, \CJ_Related_Links\Related_Links_Handler::VERSION);
 }
 ?>
