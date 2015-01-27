@@ -28,7 +28,7 @@ class CJ_Related_Links_Widget extends WP_Widget {
         
         $html = '';
         ob_start();
-        include 'admin_widget.php';
+        include 'templates/admin_widget.php';
         $html .= ob_get_clean();
         
         echo $html;
@@ -57,7 +57,7 @@ class CJ_Related_Links_Widget extends WP_Widget {
         
         $html = '';
         ob_start();
-        include 'front_widget.php';
+        include 'templates/front_widget.php';
         $html .= ob_get_clean();
         
         echo $html;

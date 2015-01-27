@@ -1,6 +1,6 @@
 <p>
-<label for="<?php echo $titleId; ?>"><?php _e('Widget Title', 'wp_widget_plugin'); ?></label>
-<input class="widefat" id="<?php echo $titleId; ?>" name="<?php echo $titleName; ?>" type="text" value="<?php echo $title; ?>" />
+    <label for="<?php echo $titleId; ?>"><?php _e('Widget Title', 'wp_widget_plugin'); ?></label>
+    <input class="widefat" id="<?php echo $titleId; ?>" name="<?php echo $titleName; ?>" type="text" value="<?php echo $title; ?>" />
 </p>
 
 <!-- <p>
