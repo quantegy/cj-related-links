@@ -19,7 +19,9 @@
             <?php endforeach; ?>
         </ul>
     <?php else: ?>
-    <div style="padding:10px 0 10px 0; font-weight: bold;">No links</div>
+    <ul class="linkList" id="relatedLinks">
+        <li style="padding:10px 0 10px 0; font-weight: bold;">No links</li>
+    </ul>
     <?php endif; ?>
 </div>
 <div>
@@ -34,6 +36,6 @@
         <input type="text" name="featureLinkUrl" id="featureLinkUrl" value="" />
     </div>
 </div>
-<p style="clear:left;">
+<p style="clear:both;">
     <button type="button" class="button" id="addLinkButton">Add Link</button>
 </p>

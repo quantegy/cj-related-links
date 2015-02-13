@@ -219,7 +219,7 @@ function initRelatedLinks($) {
             }
         });
         $('#relatedLinks').disableSelection();
-    }
+    } else {}
 }
 
 function updateRelatedLink(post_id, link_id, label, href) {
