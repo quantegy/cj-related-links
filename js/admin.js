@@ -28,7 +28,7 @@ var cjRelLink = {
 };
 
 jQuery(function ($) {
-    $('#addLinkButton').on('click', function (e) {
+    $(document).on('click', '#addLinkButton', function (e) {
         var label = $('#featureLinkLabel').val();
         var href = $('#featureLinkUrl').val();
 
