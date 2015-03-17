@@ -25,15 +25,16 @@
     <?php endif; ?>
 </div>
 <div>
+    <input type="hidden" name="featureLinkId" id="featureLinkId" value="" />
     <div>
         <label style="width:75px;">Link text:</label>
         <br />
-        <input type="text" name="featureLinkLabel" id="featureLinkLabel" value="" />
+        <input style="width: 98%;" type="text" name="featureLinkLabel" id="featureLinkLabel" value="" />
     </div>
     <div>
         <label style="width:75px;">URL:</label>
         <br />
-        <input type="text" name="featureLinkUrl" id="featureLinkUrl" value="" />
+        <input style="width: 98%;" type="text" name="featureLinkUrl" id="featureLinkUrl" value="" />
     </div>
 </div>
 <p style="clear:both;">

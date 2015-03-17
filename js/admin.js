@@ -24,10 +24,36 @@ var cjRelLink = {
             action:'related_links_remove_link',
             link_id:linkId
         }, null, 'json');
+    },
+    searchUrls: function(terms) {
+        return jQuery.post(ajaxurl, {
+            action:'related_links_json_search_urls',
+            query:terms
+        }, null, 'json');
     }
 };
 
 jQuery(function ($) {
+    // autocomplete for link labels
+    // let's check if a similar link already exists
+    $('#featureLinkUrl').autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+            $.when(cjRelLink.searchUrls(request.term)).done(function(data) {
+                //console.log($(data));
+                response($.map(data, function(v,i) {
+                    return {url: v.url, label: v.label, value: v.id};
+                }));
+            });
+        },
+        select:function(event, ui) {
+            event.preventDefault();
+            $('#featureLinkLabel').val(ui.item.label);
+            $('#featureLinkUrl').val(ui.item.url);
+            $('#featureLinkId').val(ui.item.value);
+        }
+    });
+
     $(document).on('click', '#addLinkButton', function (e) {
         var label = $('#featureLinkLabel').val();
         var href = $('#featureLinkUrl').val();
@@ -43,9 +69,7 @@ jQuery(function ($) {
              */
             var urlre = new RegExp("(ftp|http|https)://.*$", 'i');
             var isUrl = urlre.test(href);
-            //console.log(isUrl);
 
-            //if(href.indexOf('http://') != 0) {
             if (isUrl === false) {
                 $('#related_links').unblock();
 

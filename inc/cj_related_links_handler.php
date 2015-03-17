@@ -31,11 +31,25 @@ class Related_Links_Handler {
         add_action('wp_ajax_related_links_update_link', array($this, 'updateLink'));
         add_action('wp_ajax_related_links_remove_link', array($this, 'removeLink'));
 
+        add_action('wp_ajax_related_links_json_search_urls', array($this, 'jsonSearchUrls'));
+
         add_action("add_meta_boxes", array($this, "metabox"), 11, 2);
 
         add_action("save_post", array($this, 'save'));
 
         self::$instance = $this;
+    }
+
+    public function jsonSearchUrls() {
+        global $wpdb;
+
+        $terms = trim($_POST['query']);
+
+        $links = $wpdb->get_results("SELECT id, label, url FROM " . $wpdb->prefix.self::TABLE_SUFFIX . " WHERE url LIKE '%{$terms}%'");
+
+        echo json_encode($links);
+
+        die();
     }
     
     public function getAll() {
@@ -138,7 +152,7 @@ class Related_Links_Handler {
 
     public function display_admin_panel($post) {
         wp_enqueue_style('cj-rl-admin', plugins_url() . '/' . $this->pluginDir . '/css/admin.css');
-        wp_enqueue_script('related-links-admin', plugins_url() . '/' . $this->pluginDir . '/js/admin.js', array('jquery'));
+        wp_enqueue_script('related-links-admin', plugins_url() . '/' . $this->pluginDir . '/js/admin.js', array('jquery', 'jquery-ui-autocomplete'));
         wp_enqueue_script('block-ui', plugins_url() . '/' . $this->pluginDir . '/js/jquery.blockUI.js', array('jquery'));
         wp_enqueue_script('jeditable', plugins_url() . '/' . $this->pluginDir . '/js/jquery.jeditable.mini.js', array('jquery'));
 
