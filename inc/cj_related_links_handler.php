@@ -2,19 +2,16 @@
 namespace CJ_Related_Links;
 
 class Related_Links_Handler {
-    const VERSION = '0.0.1';
+    const VERSION = '0.0.2';
     const TABLE_SUFFIX = 'cj_related_links';
+    const TABLE_POST_CONNECTOR = 'cj_related_links_posts';
 
     const RELATED_LINKS_KEY = "related_links";
     const RELATED_LINKS_SLUG = "related-links";
-    
-    private $pluginDir;
 
     private static $instance;
     
-    public function __construct() {
-        $this->pluginDir = dirname(dirname(plugin_basename(__FILE__)));
-    }
+    public function __construct() {}
 
     public function init() {
         add_action('wp_ajax_related_link_reorder', array($this, "reorderLink"));
@@ -151,11 +148,6 @@ class Related_Links_Handler {
     }
 
     public function display_admin_panel($post) {
-        wp_enqueue_style('cj-rl-admin', plugins_url() . '/' . $this->pluginDir . '/css/admin.css');
-        wp_enqueue_script('related-links-admin', plugins_url() . '/' . $this->pluginDir . '/js/admin.js', array('jquery', 'jquery-ui-autocomplete'));
-        wp_enqueue_script('block-ui', plugins_url() . '/' . $this->pluginDir . '/js/jquery.blockUI.js', array('jquery'));
-        wp_enqueue_script('jeditable', plugins_url() . '/' . $this->pluginDir . '/js/jquery.jeditable.mini.js', array('jquery'));
-
         $links = $this->getLinks($post->ID);
         $html = '<!-- begin admin panel output -->';
         ob_start();
@@ -174,12 +166,21 @@ class Related_Links_Handler {
     public function getLinks($post_id) {
         global $wpdb;
         
-        $links = $wpdb->get_results(""
+        /*$links = $wpdb->get_results(""
                 . "SELECT a.id, a.post_id, a.ordinal, a.label, a.url "
                 . "FROM " . $wpdb->prefix . self::TABLE_SUFFIX . " AS a "
                 . "WHERE a.post_id = $post_id "
                 . "ORDER BY a.ordinal "
-                . "ASC");
+                . "ASC");*/
+        $sql = ""
+            . "SELECT a.id, b.post_id, b.ordinal, a.label, a.url "
+            . "FROM " . $wpdb->prefix . self::TABLE_POST_CONNECTOR . " AS b "
+            . "LEFT JOIN " . $wpdb->prefix . self::TABLE_SUFFIX . " AS a ON (a.id = b.link_id) "
+            . "WHERE b.post_id = $post_id "
+            . "ORDER BY b.ordinal "
+            . "ASC";
+
+        $links = $wpdb->get_results($sql);
         
         return $links;
     }
@@ -195,12 +196,14 @@ class Related_Links_Handler {
         
         $order = $_POST['order'];
         $linkId = $_POST['link_id'];
+        $postId = $_POST['post_id'];
         
-        $wpdb->update($wpdb->prefix.self::TABLE_SUFFIX, array(
+        $wpdb->update($wpdb->prefix.self::TABLE_POST_CONNECTOR, array(
             'ordinal' => $order
         ), array(
-            'id' => $linkId
-        ), array('%d'), array('%d'));
+            'link_id' => $linkId,
+            'post_id' => $postId
+        ), array('%d'), array('%d', '%d'));
         
         if(function_exists('json_encode')) echo json_encode($_POST);
 
@@ -208,11 +211,16 @@ class Related_Links_Handler {
     }
 
     public function deleteLink() {
+        global $wpdb;
+
         $post_id = $_POST['post_id'];
         $link_id = $_POST['link_id'];
 
-        delete_post_meta($post_id, self::RELATED_LINKS_KEY, $link_id);
-
+        //delete_post_meta($post_id, self::RELATED_LINKS_KEY, $link_id);
+        $wpdb->delete($wpdb->prefix.self::TABLE_POST_CONNECTOR, array(
+            'post_id' => $post_id,
+            'link_id' => $link_id
+        ), array('%d', '%d'));
 
         die();
     }
@@ -227,10 +235,26 @@ class Related_Links_Handler {
         $href = trim($_POST['href']);
         $post_id = $_POST['post_id'];
 
-        $wpdb->insert($tableName, array(
+        $curLink = $wpdb->get_results("SELECT a.id, b.post_id, b.ordinal, a.label, a.url
+                                        FROM " . $wpdb->prefix.self::TABLE_SUFFIX . " AS a
+                                        WHERE a.url = '{$href}'
+                                        LIMIT 0,1");
+
+        if(empty($curLink)) { // create new link
+            $wpdb->insert($tableName, array(
+                'label' => $label,
+                'url' => $href
+            ));
+
+            $linkId = $wpdb->insert_id;
+        } else { // get existing link
+            $linkId = $curLink->id;
+        }
+
+        // assign link to post
+        $wpdb->insert($wpdb->prefix.self::TABLE_POST_CONNECTOR, array(
             'post_id' => $post_id,
-            'label' => $label,
-            'url' => $href
+            'link_id' => $linkId
         ));
         
         if(function_exists('json_encode')) {
@@ -259,9 +283,13 @@ class Related_Links_Handler {
     public function removeLink() {
         global $wpdb;
         
-        $linkId = $_POST['link_id'];
+        $linkId = intval($_POST['link_id']);
+        $postId = intval($_POST['post_id']);
         
-        $wpdb->delete($wpdb->prefix.self::TABLE_SUFFIX, array('id' => $linkId));
+        $wpdb->delete($wpdb->prefix.self::TABLE_POST_CONNECTOR, array(
+            'post_id' => $postId,
+            'link_id' => $linkId
+        ), array('%d', '%d'));
         
         if(function_exists('json_encode')) { echo json_encode($_POST); }
         

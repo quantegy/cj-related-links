@@ -19,10 +19,11 @@ var cjRelLink = {
             post_id:postId
         }, null, 'html');
     },
-    remove: function(linkId) {
+    remove: function(postId, linkId) {
         return jQuery.post(ajaxurl, {
             action:'related_links_remove_link',
-            link_id:linkId
+            link_id:linkId,
+            post_id:postId
         }, null, 'json');
     },
     searchUrls: function(terms) {
@@ -162,8 +163,9 @@ jQuery(function ($) {
         e.preventDefault();
 
         var linkId = $(this).data('id');
+        var postId = $('#post_ID').val();
         
-        $.when(cjRelLink.remove(linkId)).done(function(a) {
+        $.when(cjRelLink.remove(postId, linkId)).done(function(a) {
             $.when(cjRelLink.getAll($('#post_ID').val())).done(function(b) {
                 $('#relatedLinks').html(b);
                 
@@ -172,6 +174,16 @@ jQuery(function ($) {
         });
 
         return false;
+    });
+
+    $(document).on('click', '.btnRemovePost', function(e) {
+        var postId = $(this).data('postid');
+        var linkId = $(this).data('linkid');
+        var ele = this;
+
+        $.when(cjRelLink.remove(postId, linkId)).done(function(a) {
+            $(ele).parent().remove();
+        });
     });
 
     initRelatedLinks($);

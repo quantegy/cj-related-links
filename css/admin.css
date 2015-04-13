@@ -6,6 +6,13 @@
 
 .rlItem .flLink {
     font-size: 80%;
+    word-wrap: break-word;
+    -moz-word-break: break-all;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
 }
 
 .goright {
@@ -23,4 +30,20 @@
     height: 0;
     line-height: 0;
     visibility: hidden;
+}
+
+#postsList .linkPostTitle {
+    float:left;
+    margin-right:20px;
+}
+
+#postsList .btnRemovePost {
+    float:left;
+}
+
+#postsList .postsItem {
+    background-color: #f0f0f0;
+    border: 1px solid #bfbfbf;
+    margin-bottom: 10px;
+    padding:10px;
 }

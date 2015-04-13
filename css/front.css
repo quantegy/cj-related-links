@@ -1,3 +1,10 @@
 .list-url {
     font-size:80%;
+    word-wrap: break-word;
+    -moz-word-break: break-all;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
 }

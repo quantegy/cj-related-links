@@ -7,9 +7,9 @@ class Related_Links_List_Table extends WP_List_Table {
 
     public function get_columns() {
         $columns = array(
-            'id' => 'Post',
             'label' => 'Label',
-            'url' => 'URL'
+            'url' => 'Url',
+            'manage' => '&nbsp;'
         );
 
         return $columns;
@@ -44,11 +44,18 @@ class Related_Links_List_Table extends WP_List_Table {
         return $data;
     }
 
-    public function column_id($item) {
+    /*public function column_id($item) {
         $postId = $item['post_id'];
 
         $html = '<span style="font-size: larger; font-weight: bold; font-style: italic;"><a href="' . admin_url('post.php?post='.$postId.'&action=edit') . '">' . get_post_field('post_title', $postId, 'display') . '</a></span>';
         $html .= '<br /><br />';
+        $html .= '<a href="' . admin_url('admin.php?page=cj_related_links_edit&id=' . $item['id']) . '">Edit</a>';
+
+        return $html;
+    }*/
+
+    public function column_manage($item) {
+        $html = '';
         $html .= '<a href="' . admin_url('admin.php?page=cj_related_links_edit&id=' . $item['id']) . '">Edit</a>';
 
         return $html;

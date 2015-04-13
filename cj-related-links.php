@@ -15,6 +15,7 @@ defined('ABSPATH') or die("No script kiddies please!");
 set_include_path(get_include_path().PATH_SEPARATOR.dirname(__FILE__));
 
 @define('CJ_RELATED_LINKS_VERSION_OPTION', 'cj_related_links_version');
+@define('CJ_RELATED_LINKS_PLUGIN_DIR', dirname(plugin_basename(__FILE__)));
 
 require_once 'inc/cj_related_links_handler.php';
 require_once 'inc/cj_related_links_widget.php';
@@ -31,7 +32,19 @@ add_action('widgets_init', 'cj_related_links_load_widget');
 
 add_action('admin_menu', 'cj_related_links_admin_menu');
 
-// FUNCTIONS
+add_action('wp_enqueue_scripts', 'cj_related_links_enqueue_scripts');
+add_action('admin_enqueue_scripts', 'cj_related_links_enqueue_admin_scripts');
+
+function cj_related_links_enqueue_scripts() {
+    wp_enqueue_style('cj-rl-front', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/css/front.css');
+}
+
+function cj_related_links_enqueue_admin_scripts() {
+    wp_enqueue_style('cj-rl-admin', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/css/admin.css');
+    wp_enqueue_script('related-links-admin', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/admin.js', array('jquery', 'jquery-ui-autocomplete'));
+    wp_enqueue_script('block-ui', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/jquery.blockUI.js', array('jquery'));
+    wp_enqueue_script('jeditable', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/jquery.jeditable.mini.js', array('jquery'));
+}
 
 /**
  * Load up widget
@@ -51,9 +64,11 @@ function cj_related_links_check() {
 
 /**
  * Initial install of plugin
- * @global type $wpdb
+ * @global  $wpdb
  */
 function cj_related_links_install() {
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
     global $wpdb;
     
     $tableName = $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_SUFFIX;
@@ -65,7 +80,28 @@ function cj_related_links_install() {
             . "label VARCHAR(255) NOT NULL DEFAULT '',"
             . "url VARCHAR(255) NOT NULL DEFAULT '',"
             . "UNIQUE KEY id (id)) $charsetCollate;";
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($sql);
+
+    unset($sql);
+
+    // alter table to remove post_id and ordinal. we are moving this to a related table
+    $oldRow = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '" . $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_SUFFIX . "' AND column_name = 'post_id'");
+    if(!empty($oldRow)) { // old rows exist so get rid of them
+        $sql = "ALTER TABLE {$tableName} DROP COLUMN post_id, DROP COLUMN ordinal";
+        $wpdb->query($sql);
+    }
+
+    unset($sql);
+    unset($tableName);
+
+    // create post/link relationship table, and move in post_id and ordinal from links table
+    $tableName = $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_POST_CONNECTOR;
+    $sql = "CREATE TABLE IF NOT EXISTS {$tableName} ("
+            . "id INT(11) NOT NULL AUTO_INCREMENT,"
+            . "post_id INT(11) NOT NULL,"
+            . "link_id INT(11) NOT NULL,"
+            . "ordinal SMALLINT(2) NOT NULL DEFAULT 0,"
+            . "UNIQUE KEY id (id)) {$charsetCollate}";
     dbDelta($sql);
     
     add_option(CJ_RELATED_LINKS_VERSION_OPTION, \CJ_Related_Links\Related_Links_Handler::VERSION);
@@ -132,6 +168,15 @@ function cj_related_links_edit_page() {
 
     $label = htmlspecialchars_decode($link->label);
     $label = stripslashes($label);
+
+    unset($sql);
+
+    $sql = "SELECT a.*
+            FROM " . $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_POST_CONNECTOR . " AS b
+            LEFT JOIN " . $wpdb->posts . " AS a ON (a.id = b.post_id)
+            WHERE b.link_id = '{$linkId}'";
+
+    $posts = $wpdb->get_results($sql);
     ?>
     <div class="wrap">
         <h2>Edit Link <em><?php echo $label; ?></em></h2>
@@ -142,22 +187,41 @@ function cj_related_links_edit_page() {
         <?php endif; ?>
         <div class="postbox">
             <div class="inside">
-                <form name="link" method="post" id="link" autocomplete="off">
-                    <input type="hidden" name="page" value="cj_related_links_edit" />
-                    <input type="hidden" name="id" value="<?php echo $link->id; ?>" />
-                    <input type="hidden" name="isUpdate" value="1" />
-                    <div>
-                        <label for="linkLabel">Label</label>
-                        <input type="text" class="input" name="linkLabel" id="linkLabel" style="width: 98%;" value="<?php echo $label; ?>" />
-                    </div>
-                    <div>
-                        <label for="linUrl">URL</label>
-                        <input type="text" class="input" id="linkUrl" name="linkUrl" style="width: 98%;" value="<?php echo $link->url; ?>" />
-                    </div>
-                    <div style="margin: 10px 0 10px 0;">
-                        <button class="button" type="submit">Update</button>
-                    </div>
-                </form>
+                <div>
+                    <form name="link" method="post" id="link" autocomplete="off">
+                        <input type="hidden" name="page" value="cj_related_links_edit" />
+                        <input type="hidden" name="id" value="<?php echo $link->id; ?>" />
+                        <input type="hidden" name="isUpdate" value="1" />
+                        <div>
+                            <label for="linkLabel">Label</label>
+                            <input type="text" class="input" name="linkLabel" id="linkLabel" style="width: 98%;" value="<?php echo $label; ?>" />
+                        </div>
+                        <div>
+                            <label for="linUrl">URL</label>
+                            <input type="text" class="input" id="linkUrl" name="linkUrl" style="width: 98%;" value="<?php echo $link->url; ?>" />
+                        </div>
+                        <div style="margin: 10px 0 10px 0;">
+                            <button class="button" type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="postsList"> <!-- posts assigned to this link -->
+                    <h3>Belonging to posts:</h3>
+                    <?php if(!empty($posts)): ?>
+                        <ul>
+                            <?php foreach($posts as $post): ?>
+                            <li class="clearfix postsItem">
+                                <div class="linkPostTitle">
+                                    <a href="<?php echo admin_url('post.php?post='.$post->ID.'&action=edit'); ?>"><?php echo get_the_title($post->ID); ?></a>
+                                </div>
+                                <button type="button" class="btnRemovePost button" data-linkid="<?php echo $link->id; ?>" data-postid="<?php echo $post->ID; ?>">Remove</button>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <div>Not available in any posts.</div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
