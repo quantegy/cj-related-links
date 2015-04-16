@@ -15,19 +15,13 @@ class Related_Links_Handler {
 
     public function init() {
         add_action('wp_ajax_related_link_reorder', array($this, "reorderLink"));
-
         add_action("wp_ajax_related_links_add", array($this, "addLink"));
-
         add_action('wp_ajax_related_links_list', array($this, "displayLinks"));
-        
         add_action('wp_ajax_related_links_get_all', array($this, 'getAll'));
-
         add_action('wp_ajax_related_links_get_one', array($this, "getLinkJson"));
-        
         add_action('wp_ajax_related_links_update_label', array($this, 'updateLabel'));
         add_action('wp_ajax_related_links_update_link', array($this, 'updateLink'));
         add_action('wp_ajax_related_links_remove_link', array($this, 'removeLink'));
-
         add_action('wp_ajax_related_links_json_search_urls', array($this, 'jsonSearchUrls'));
 
         add_action("add_meta_boxes", array($this, "metabox"), 11, 2);

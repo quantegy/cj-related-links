@@ -85,7 +85,8 @@ function cj_related_links_install() {
     unset($sql);
 
     // alter table to remove post_id and ordinal. we are moving this to a related table
-    $oldRow = $wpdb->get_results("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '" . $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_SUFFIX . "' AND column_name = 'post_id'");
+    $oldRow = $wpdb->get_results("SHOW COLUMNS FROM " . $wpdb->prefix . \CJ_Related_Links\Related_Links_Handler::TABLE_SUFFIX . " WHERE Field = 'post_id'");
+
     if(!empty($oldRow)) { // old rows exist so get rid of them
         $sql = "ALTER TABLE {$tableName} DROP COLUMN post_id, DROP COLUMN ordinal";
         $wpdb->query($sql);
@@ -108,8 +109,22 @@ function cj_related_links_install() {
 }
 
 function cj_related_links_admin_menu() {
-    add_menu_page('Related Links', 'CJ Related Links', 'delete_posts', 'cj_related_links_admin', 'cj_related_links_admin_page');
+    add_menu_page('Related Links', 'CJ Related Links', 'delete_posts', 'cj_related_links_settings', 'cj_related_links_settings_page');
+    add_submenu_page('cj_related_links_settings', 'Links', 'All Links', 'delete_posts', 'cj_related_links_admin', 'cj_related_links_admin_page');
     add_submenu_page(null, 'Edit related Link', null, 'delete_posts', 'cj_related_links_edit', 'cj_related_links_edit_page');
+}
+
+function cj_related_links_settings_page() {
+    ?>
+    <div class="wrap">
+        <div class="postbox">
+            <div class="inside">
+            <div id="icon-users" class="icon32"></div>
+                <h2>CJ Related Links Settings</h2>
+            </div>
+        </div>
+    </div>
+    <?php
 }
 
 function cj_related_links_admin_page() {
