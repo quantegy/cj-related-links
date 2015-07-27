@@ -56,10 +56,11 @@ class CJ_Related_Links_Widget extends WP_Widget {
         $links = \CJ_Related_Links\Related_Links_Handler::getInstance()->getLinks($post->ID);
         
         $html = '';
-        ob_start();
-        include 'templates/front_widget.php';
-        $html .= ob_get_clean();
-        
+        if(is_single()) {
+            ob_start();
+            include 'templates/front_widget.php';
+            $html .= ob_get_clean();
+        }
         echo $html;
         
         
