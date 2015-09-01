@@ -7,8 +7,8 @@
     <ul>
         <?php foreach($links as $link): ?>
         <li>
-            <div><a href="<?php echo $link->url; ?>"><?php echo stripslashes($link->label); ?></a></div>
-            <div class="list-url"><?php echo $link->url; ?></div>
+            <div><a href="<?php echo htmlentities($link->url); ?>"><?php echo stripslashes($link->label); ?></a></div>
+            <div class="list-url"><?php echo htmlentities($link->url); ?></div>
         </li>
         <?php endforeach; ?>
     </ul>

@@ -209,8 +209,6 @@ function initRelatedLinks($) {
     if ($('#relatedLinks').length > 0) {
         
         $('.flLabel').editable(function(value, settings) {
-            console.log(settings);
-
             var linkId = $(this).data('id');
 
             $.when(cjRelLink.updateLabel(linkId, value)).done(function(a) {
@@ -225,7 +223,8 @@ function initRelatedLinks($) {
         }, {
             type:'text',
             onblur:'submit',
-            select:true
+            select:true,
+            output: 'text'
         });
         
         $('.flLink').editable(function(value, settings) {
@@ -243,7 +242,8 @@ function initRelatedLinks($) {
         }, {
             type:'text',
             onblur:'submit',
-            select:true
+            select:true,
+            output: 'text'
         });
         
         $('#relatedLinks').sortable({

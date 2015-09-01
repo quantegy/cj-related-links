@@ -43,7 +43,7 @@ function cj_related_links_enqueue_admin_scripts() {
     wp_enqueue_style('cj-rl-admin', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/css/admin.css');
     wp_enqueue_script('related-links-admin', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/admin.js', array('jquery', 'jquery-ui-autocomplete'));
     wp_enqueue_script('block-ui', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/jquery.blockUI.js', array('jquery'));
-    wp_enqueue_script('jeditable', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/jquery.jeditable.mini.js', array('jquery'));
+    wp_enqueue_script('jeditable', plugins_url() . '/' . CJ_RELATED_LINKS_PLUGIN_DIR . '/js/jquery.jeditable.js', array('jquery'));
 }
 
 /**
