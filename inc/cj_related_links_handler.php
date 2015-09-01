@@ -63,7 +63,9 @@ class Related_Links_Handler {
         global $wpdb;
         
         $linkId = $_POST['link_id'];
-        $label = $_POST['label'];
+        $label = trim($_POST['label']);
+        $label = html_entity_decode($label);
+        $label = htmlentities($label);
         
         $wpdb->update($wpdb->prefix.self::TABLE_SUFFIX, array(
             'label' => $label
@@ -86,7 +88,8 @@ class Related_Links_Handler {
         global $wpdb;
         
         $linkId = $_POST['link_id'];
-        $url = $_POST['url'];
+        $url = trim($_POST['url']);
+        $url = esc_url_raw($url/*, array('http', 'https')*/);
         
         $wpdb->update($wpdb->prefix.self::TABLE_SUFFIX, array(
             'url' => $url
@@ -170,7 +173,7 @@ class Related_Links_Handler {
             . "SELECT a.id, b.post_id, b.ordinal, a.label, a.url "
             . "FROM " . $wpdb->prefix . self::TABLE_POST_CONNECTOR . " AS b "
             . "LEFT JOIN " . $wpdb->prefix . self::TABLE_SUFFIX . " AS a ON (a.id = b.link_id) "
-            . "WHERE b.post_id = $post_id "
+            . "WHERE b.post_id = '{$post_id}' "
             . "ORDER BY b.ordinal "
             . "ASC";
 
@@ -225,8 +228,13 @@ class Related_Links_Handler {
         $tableName = $wpdb->prefix . self::TABLE_SUFFIX;
         
         $label = trim($_POST['label']);
-        $label = htmlentities($label, ENT_QUOTES, get_option('blog_charset'));
+        //$label = htmlentities($label, ENT_QUOTES, get_option('blog_charset'));
+        $label = html_entity_decode($label);
+        $label = htmlentities($label);
+
         $href = trim($_POST['href']);
+        $href = esc_url_raw($href);
+
         $post_id = $_POST['post_id'];
 
         $curLink = $wpdb->get_results("SELECT a.id, b.post_id, b.ordinal, a.label, a.url

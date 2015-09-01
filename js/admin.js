@@ -43,7 +43,7 @@ jQuery(function ($) {
             $.when(cjRelLink.searchUrls(request.term)).done(function(data) {
                 //console.log($(data));
                 response($.map(data, function(v,i) {
-                    return {url: v.url, label: v.label, value: v.id};
+                    return {url: v.url, label: $('<div/>').html(v.label).text(), value: v.id};
                 }));
             });
         },
@@ -209,8 +209,10 @@ function initRelatedLinks($) {
     if ($('#relatedLinks').length > 0) {
         
         $('.flLabel').editable(function(value, settings) {
+            console.log(settings);
+
             var linkId = $(this).data('id');
-            
+
             $.when(cjRelLink.updateLabel(linkId, value)).done(function(a) {
                 $.when(cjRelLink.getAll($('#post_ID').val())).done(function(b) {
                     $('#relatedLinks').html(b);
